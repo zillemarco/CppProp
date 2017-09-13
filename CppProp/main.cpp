@@ -1,53 +1,39 @@
 #include <iostream>
-#include "Property.h"
+#include "PropertyBinding.h"
 
 using namespace std;
-
-inline void ValueChanged(const float& newValue)
-{
-	cout << "Value changed to " << newValue << endl;
-}
 
 class A
 {
 public:
 	A()
-		: test(0.0f, *this)
-		, test2(8, *this)
+		: pubGetPubSet(1, *this)
+		, pubGetPriSet(2, *this)
+		, priGetPubSet(3, *this)
+		, priGetPriSet(4, *this)
 	{ }
 
-	void Test()
-	{
-		test.Set(10.0f);
-	}
-
-	void SetTest(const float& val)
-	{
-		test._value = val;
-	}
-
-	const float& GetTest()
-	{
-		return test._value;
-	}
-
 public:
-	PROPERTY(test2, int, A, Public, Private, public);
-
-	Property<float, A, &GetTest, &SetTest, Public, Private> test;
+	Property<int, A, Public, Public>	pubGetPubSet;
+	Property<int, A, Public, Private>	pubGetPriSet;
+	Property<int, A, Private, Public>	priGetPubSet;
+	Property<int, A, Private, Private>	priGetPriSet;
 };
 
 int main(int argc, char** argv)
 {
-	A a;
+	A test;
 
-	cout << "Start: " << a.test.Get() << endl;
-	a.Test();
-	cout << "End: " << a.test.Get() << endl;
+	BindingContext bc;
+	bc.AddProperty("a", &test.pubGetPubSet);
+	bc.AddProperty("b", &test.pubGetPriSet);
+	bc.AddProperty("c", &test.priGetPubSet);
+	bc.AddProperty("d", &test.priGetPriSet);
 
-	cout << "Start: " << a.test2.Get() << endl;
-	a.Test();
-	cout << "End: " << a.test2.Get() << endl;
+	int i = bc.GetPropertyValue("a", 0);
+
+	int k = 5;
+	int j = *((int*)bc.GetPropertyValueGeneric("m", &k));
 
 	system("pause");
 
